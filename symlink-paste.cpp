@@ -17,7 +17,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	LPDATAOBJECT pData = 0;
 	wchar_t sourceName[MAX_PATH];
 
-	if (S_OK == OleGetClipboard(&pData))
+   	if (S_OK == OleGetClipboard(&pData))
 	{
 		FORMATETC format = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		FORMATETC textformat = { CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
@@ -89,7 +89,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 			if (!PathFileExists(targetName))
 			{
-				if (!CreateSymbolicLink(targetName, sourceName, PathIsDirectory(sourceName) ? SYMBOLIC_LINK_FLAG_DIRECTORY : NULL))
+				if (!CreateSymbolicLink(targetName, sourceName,
+#ifdef SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
+                    SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE |
+#endif
+                    (PathIsDirectory(sourceName) ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0)))
 				{
 					error = UnknownError;
 				}
